@@ -3,38 +3,97 @@
 <head>
   <meta charset="UTF-8" />
   <title>Jeu TSSR – Parc Aquatique Réseau</title>
+
   <style>
-    body { font-family: Arial, sans-serif; background:#f4f7fb; margin:0 }
-    header { background:#1e293b; color:#fff; padding:16px; text-align:center }
-    main { padding:20px; text-align:center; position:relative }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f7fb;
+      margin: 0;
+    }
 
-    
-.img-container {
-  position: relative;
-  display: block;
-  margin: auto;
-}
-    img {
-  width: 1200px;   /* adapte à la vraie largeur de ton image */
-  height: auto;
-  border-radius:12px;
-  border:2px solid #1e293b;
-}
+    header {
+      background: #1e293b;
+      color: #ffffff;
+      padding: 16px;
+      text-align: center;
+    }
 
-    .panel { margin-top:16px; background:#fff; padding:16px; border-radius:12px; box-shadow:0 4px 8px rgba(0,0,0,.1) }
-    .question { font-weight:bold; margin-top:16px }
-    .ok { color:green; font-weight:bold }
-    .ko { color:red; font-weight:bold }
+    main {
+      padding: 20px;
+      text-align: center;
+    }
 
-    button { margin-top:12px; padding:10px 20px; font-size:16px; border-radius:8px; border:none; cursor:pointer; background:#2563eb; color:#fff }
-    button:hover { background:#1d4ed8 }
+    /* === IMAGE + ZONES === */
+    .img-container {
+      position: relative;
+      width: 1024px;          /* ⬅️ IMPORTANT : largeur réelle de l’image */
+      margin: 20px auto;
+    }
 
-    svg { position:absolute; top:0; left:0; pointer-events:none }
-    .flow { stroke-width:6; fill:none; stroke-dasharray:10; animation:dash 2s linear infinite }
-    @keyframes dash { to { stroke-dashoffset:-20 } }
+    .img-container img {
+      width: 100%;
+      border-radius: 12px;
+      border: 2px solid #1e293b;
+      display: block;
+    }
+
+    .zone {
+      position: absolute;
+      cursor: pointer;
+      /* DEBUG visuel : décommente si besoin */
+      /* border: 2px dashed red; */
+    }
+
+    /* === Ajuste UNE FOIS ces valeurs en regardant l’image === */
+    .lan  { top: 350px; left: 600px; width: 300px; height: 180px; }
+    .vlan { top: 520px; left: 400px; width: 260px; height: 160px; }
+    .dmz  { top: 360px; left: 360px; width: 320px; height: 200px; }
+    .wan  { top: 300px; left: 90px;  width: 320px; height: 220px; }
+
+    /* === PANELS === */
+    .panel {
+      margin: 16px auto;
+      background: white;
+      padding: 14px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      max-width: 500px;
+    }
+
+    .question {
+      font-weight: bold;
+      margin-top: 20px;
+    }
+
+    .ok {
+      color: green;
+      font-weight: bold;
+    }
+
+    .ko {
+      color: red;
+      font-weight: bold;
+    }
+
+    button {
+      margin-top: 16px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: #2563eb;
+      color: #ffffff;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
   </style>
 </head>
+
 <body>
+
 <header>
   <h1>🎢 Jeu TSSR – Architecture Réseau</h1>
   <p>Objectif : clique sur la bonne zone réseau le plus vite possible</p>
@@ -42,91 +101,97 @@
 
 <main>
 
-  <!-- IMAGE + MAP (OBLIGATOIRE POUR LES CLICS) -->
+  <!-- IMAGE + ZONES CLIQUABLES -->
   <div class="img-container">
-  <img src="parc-aquatique-reseau.png" usemap="#zones" alt="Parc aquatique réseau">
+    <img src="parc-aquatique-reseau.png" alt="Parc aquatique réseau TSSR">
 
-    <!-- Animation des flux -->
-    <svg width="1200" height="600">
-      <path d="M150 380 C350 350, 550 350, 650 300" class="flow" stroke="#2563eb" />
-      <path d="M650 300 C850 250, 1050 200" class="flow" stroke="#9333ea" />
-    </svg>
+    <div class="zone lan"  onclick="check('LAN')"></div>
+    <div class="zone vlan" onclick="check('VLAN')"></div>
+    <div class="zone dmz"  onclick="check('DMZ')"></div>
+    <div class="zone wan"  onclick="check('WAN')"></div>
   </div>
-
-  <!-- ZONES CLIQUABLES -->
-  <map name="zones">
-    <area shape="rect" coords="50,300,260,480" href="#" onclick="check('LAN'); return false;">
-    <area shape="rect" coords="270,300,480,480" href="#" onclick="check('VLAN'); return false;">
-    <area shape="rect" coords="500,260,720,440" href="#" onclick="check('DMZ'); return false;">
-    <area shape="rect" coords="760,180,1040,360" href="#" onclick="check('WAN'); return false;">
-  </map>
 
   <div class="question" id="question"></div>
 
-  <div class="panel" id="feedback">Clique sur l'image pour commencer.</div>
+  <div class="panel" id="feedback">
+    Clique sur une zone pour commencer.
+  </div>
 
   <div class="panel">
-    🎯 Score : <span id="score">0</span> | ⏱️ Temps : <span id="time">0</span> s
+    🎯 Score : <span id="score">0</span>
+    &nbsp; | &nbsp;
+    ⏱ Temps : <span id="time">0</span> s
   </div>
 
   <button onclick="replay()">🔄 Rejouer</button>
+
 </main>
 
 <script>
-  const levels = ['LAN','VLAN','DMZ','WAN'];
+  const levels = ['LAN', 'VLAN', 'DMZ', 'WAN'];
   let level = 0;
   let score = 0;
   let time = 0;
-  let timer;
+  let timer = null;
 
-  function startTimer(){
-    clearInterval(timer);
+  function startTimer() {
+    if (timer) return;
     timer = setInterval(() => {
       time++;
-      document.getElementById('time').innerText = time;
+      document.getElementById('time').textContent = time;
     }, 1000);
   }
 
-  function updateQuestion(){
-    document.getElementById('question').innerHTML = 'Niveau ' + (level+1) + ' : Clique sur la zone <u>' + levels[level] + '</u>';
+  function updateQuestion() {
+    document.getElementById('question').innerHTML =
+      'Niveau ' + (level + 1) + ' : Clique sur <u>' + levels[level] + '</u>';
   }
 
-  function check(zone){
-    if(level === 0 && time === 0) startTimer();
-
+  function check(zone) {
+    startTimer();
     const feedback = document.getElementById('feedback');
-    if(zone === levels[level]){
+
+    if (zone === levels[level]) {
       score += 10;
-      feedback.innerHTML = '✅ Bonne réponse ! (' + zone + ')';
-      feedback.className = 'panel ok';
       level++;
-      if(level >= levels.length){
+      feedback.textContent = '✅ Bonne réponse : ' + zone;
+      feedback.className = 'panel ok';
+
+      if (level >= levels.length) {
         clearInterval(timer);
-        feedback.innerHTML = '🎉 Jeu terminé !<br>Score final : ' + score + '<br>Temps : ' + time + ' secondes';
-        document.getElementById('question').innerHTML = 'Bravo, tous les niveaux sont réussis !';
+        timer = null;
+        feedback.innerHTML =
+          '🎉 Jeu terminé !<br>Score : ' + score + '<br>Temps : ' + time + ' s';
+        document.getElementById('question').textContent =
+          'Bravo, tous les niveaux sont réussis !';
         return;
       }
     } else {
-      feedback.innerHTML = '❌ Mauvaise zone. Réessaie.';
+      feedback.textContent = '❌ Mauvaise zone, réessaie.';
       feedback.className = 'panel ko';
     }
-    document.getElementById('score').innerText = score;
+
+    document.getElementById('score').textContent = score;
     updateQuestion();
   }
 
-  function replay(){
+  function replay() {
     level = 0;
     score = 0;
     time = 0;
     clearInterval(timer);
-    document.getElementById('score').innerText = score;
-    document.getElementById('time').innerText = time;
-    document.getElementById('feedback').innerHTML = 'Nouvelle partie lancée !';
+    timer = null;
+
+    document.getElementById('score').textContent = score;
+    document.getElementById('time').textContent = time;
+    document.getElementById('feedback').textContent = 'Nouvelle partie lancée.';
     document.getElementById('feedback').className = 'panel';
+
     updateQuestion();
   }
 
   updateQuestion();
 </script>
+
 </body>
 </html>
