@@ -4,19 +4,34 @@
   <meta charset="UTF-8" />
   <title>Jeu TSSR – Parc Aquatique Réseau</title>
   <style>
-    body {font-family: Arial, sans-serif;background:#f4f7fb;margin:0}
-    header {background:#1e293b;color:#fff;padding:16px;text-align:center}
-    main {padding:20px;text-align:center}
-    img {max-width:100%;border-radius:12px;border:2px solid #1e293b}
-    .panel {margin-top:16px;background:#fff;padding:16px;border-radius:12px;box-shadow:0 4px 8px rgba(0,0,0,.1)}
-    .question {font-weight:bold;margin-top:16px}
-    .ok {color:green;font-weight:bold}
-    .ko {color:red;font-weight:bold}
-    button {margin-top:12px;padding:10px 20px;font-size:16px;border-radius:8px;border:none;cursor:pointer;background:#2563eb;color:#fff}
-    button:hover {background:#1d4ed8}
-    svg {position:absolute;top:0;left:0;pointer-events:none}
-    .flow {stroke-width:6;fill:none;stroke-dasharray:10;animation:dash 2s linear infinite}
-    @keyframes dash {to{stroke-dashoffset:-20}}
+    body { font-family: Arial, sans-serif; background:#f4f7fb; margin:0 }
+    header { background:#1e293b; color:#fff; padding:16px; text-align:center }
+    main { padding:20px; text-align:center; position:relative }
+
+    
+.img-container {
+  position: relative;
+  display: block;
+  margin: auto;
+}
+    img {
+  width: 1200px;   /* adapte à la vraie largeur de ton image */
+  height: auto;
+  border-radius:12px;
+  border:2px solid #1e293b;
+}
+
+    .panel { margin-top:16px; background:#fff; padding:16px; border-radius:12px; box-shadow:0 4px 8px rgba(0,0,0,.1) }
+    .question { font-weight:bold; margin-top:16px }
+    .ok { color:green; font-weight:bold }
+    .ko { color:red; font-weight:bold }
+
+    button { margin-top:12px; padding:10px 20px; font-size:16px; border-radius:8px; border:none; cursor:pointer; background:#2563eb; color:#fff }
+    button:hover { background:#1d4ed8 }
+
+    svg { position:absolute; top:0; left:0; pointer-events:none }
+    .flow { stroke-width:6; fill:none; stroke-dasharray:10; animation:dash 2s linear infinite }
+    @keyframes dash { to { stroke-dashoffset:-20 } }
   </style>
 </head>
 <body>
@@ -25,24 +40,26 @@
   <p>Objectif : clique sur la bonne zone réseau le plus vite possible</p>
 </header>
 
-<main style="position:relative;">
+<main>
 
-  <!-- IMAGE PRINCIPALE -->
+  <!-- IMAGE + MAP (OBLIGATOIRE POUR LES CLICS) -->
+  <div class="img-container">
   <img src="parc-aquatique-reseau.png" usemap="#zones" alt="Parc aquatique réseau">
+
+    <!-- Animation des flux -->
+    <svg width="1200" height="600">
+      <path d="M150 380 C350 350, 550 350, 650 300" class="flow" stroke="#2563eb" />
+      <path d="M650 300 C850 250, 1050 200" class="flow" stroke="#9333ea" />
+    </svg>
+  </div>
 
   <!-- ZONES CLIQUABLES -->
   <map name="zones">
-    <area shape="rect" coords="50,300,260,480" onclick="check('LAN')">
-    <area shape="rect" coords="270,300,480,480" onclick="check('VLAN')">
-    <area shape="rect" coords="500,260,720,440" onclick="check('DMZ')">
-    <area shape="rect" coords="760,180,1040,360" onclick="check('WAN')">
+    <area shape="rect" coords="50,300,260,480" href="#" onclick="check('LAN'); return false;">
+    <area shape="rect" coords="270,300,480,480" href="#" onclick="check('VLAN'); return false;">
+    <area shape="rect" coords="500,260,720,440" href="#" onclick="check('DMZ'); return false;">
+    <area shape="rect" coords="760,180,1040,360" href="#" onclick="check('WAN'); return false;">
   </map>
-
-  <!-- ANIMATION DES FLUX -->
-  <svg width="1200" height="600">
-    <path d="M150 380 C350 350, 550 350, 650 300" class="flow" stroke="#2563eb" />
-    <path d="M650 300 C850 250, 1050 200" class="flow" stroke="#9333ea" />
-  </svg>
 
   <div class="question" id="question"></div>
 
