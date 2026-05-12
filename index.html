@@ -2,103 +2,78 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Jeu TSSR – Architecture Réseau</title>
+  <title>Jeu TSSR – Parc Aquatique Réseau</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f7fb;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #1e293b;
-      color: #fff;
-      padding: 16px;
-      text-align: center;
-    }
-    main {
-      padding: 20px;
-    }
-    .zone {
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    .lan { background: #cfe9ff; }
-    .wan { background: #e5d5ff; }
-    .dmz { background: #ffe2cc; }
-    .vlan { background: #d3f9d8; }
-
-    .equipement {
-      display: inline-block;
-      background: #fff;
-      border-radius: 8px;
-      padding: 10px 14px;
-      margin: 6px;
-      cursor: pointer;
-      border: 2px solid transparent;
-    }
-    .equipement:hover {
-      border-color: #2563eb;
-    }
-    #info {
-      background: #fff;
-      border-radius: 12px;
-      padding: 16px;
-      min-height: 100px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
+    body {font-family: Arial, sans-serif;background:#f4f7fb;margin:0}
+    header {background:#1e293b;color:#fff;padding:16px;text-align:center}
+    main {padding:20px;text-align:center}
+    img {max-width:100%;border-radius:12px;border:2px solid #1e293b}
+    .panel {margin-top:16px;background:#fff;padding:16px;border-radius:12px;box-shadow:0 4px 8px rgba(0,0,0,.1)}
+    .question {font-weight:bold;margin-top:16px}
+    .ok {color:green;font-weight:bold}
+    .ko {color:red;font-weight:bold}
+    svg {position:absolute;top:0;left:0;pointer-events:none}
+    .flow {stroke-width:6;fill:none;stroke-dasharray:10;animation:dash 2s linear infinite}
+    @keyframes dash {to{stroke-dashoffset:-20}}
   </style>
 </head>
 <body>
-  <header>
-    <h1>🎢 Jeu TSSR – Le Parc Aquatique Réseau</h1>
-    <p>Clique sur un équipement pour comprendre son rôle réseau</p>
-  </header>
+<header>
+  <h1>🎢 Jeu TSSR – Architecture Réseau</h1>
+  <p>Objectif : clique sur la bonne zone réseau</p>
+</header>
 
-  <main>
-    <div class="zone lan">
-      <h2>🌊 LAN (réseau local)</h2>
-      <div class="equipement" onclick="showInfo('pc')">🖥️ PC Client</div>
-      <div class="equipement" onclick="showInfo('switch')">🔀 Switch</div>
-      <div class="equipement" onclick="showInfo('wifi')">📡 Wi‑Fi</div>
-      <div class="equipement" onclick="showInfo('dhcp')">🚰 DHCP</div>
-      <div class="equipement vlan" onclick="showInfo('vlan')">🎨 VLAN</div>
-    </div>
+<main style="position:relative;">
+  <img src="parc-aquatique-reseau.png" usemap="#zones" alt="Parc aquatique réseau TSSR">
 
-    <div class="zone dmz">
-      <h2>🏝️ DMZ</h2>
-      <div class="equipement" onclick="showInfo('serveur')">🗄️ Serveur Web</div>
-    </div>
+  <map name="zones">
+    <area shape="rect" coords="50,300,260,480" onclick="check('LAN')">
+    <area shape="rect" coords="270,300,480,480" onclick="check('VLAN')">
+    <area shape="rect" coords="500,260,720,440" onclick="check('DMZ')">
+    <area shape="rect" coords="760,180,1040,360" onclick="check('WAN')">
+  </map>
 
-    <div class="zone wan">
-      <h2>🌍 WAN / Internet</h2>
-      <div class="equipement" onclick="showInfo('routeur')">🚦 Routeur</div>
-      <div class="equipement" onclick="showInfo('firewall')">🧱 Pare‑feu</div>
-      <div class="equipement" onclick="showInfo('dns')">🌐 DNS</div>
-    </div>
+  <svg width="1200" height="600">
+    <path d="M150 380 C350 350, 550 350, 650 300" class="flow" stroke="#2563eb" />
+    <path d="M650 300 C850 250, 1050 200" class="flow" stroke="#9333ea" />
+  </svg>
 
-    <h2>ℹ️ Informations</h2>
-    <div id="info">Clique sur un élément du réseau pour afficher son rôle.</div>
-  </main>
+  <div class="question" id="question"></div>
 
-  <script>
-    function showInfo(type) {
-      const info = document.getElementById('info');
-      const data = {
-        pc: "PC Client : poste utilisateur qui consomme les services réseau.",
-        switch: "Switch : relie les équipements du LAN et commute les trames (couche 2).",
-        wifi: "Wi‑Fi : permet l'accès réseau sans fil, souvent associé à un VLAN spécifique.",
-        dhcp: "DHCP : attribue automatiquement des adresses IP aux clients.",
-        vlan: "VLAN : segmentation logique du réseau pour isoler les flux.",
-        serveur: "Serveur en DMZ : fournit un service accessible depuis Internet tout en étant isolé du LAN.",
-        routeur: "Routeur : permet la communication entre réseaux différents (LAN, WAN).",
-        firewall: "Pare‑feu : filtre et sécurise les flux réseau selon des règles.",
-        dns: "DNS : traduit les noms de domaine en adresses IP."
-      };
-      info.innerHTML = '<strong>' + data[type] + '</strong>';
+  <div class="panel" id="feedback">Clique sur l'image pour commencer.</div>
+  <div class="panel">🎯 Score : <span id="score">0</span></div>
+</main>
+
+<script>
+  const levels = ['LAN','VLAN','DMZ','WAN'];
+  let level = 0;
+  let score = 0;
+
+  function updateQuestion(){
+    document.getElementById('question').innerHTML = 'Niveau ' + (level+1) + ' : Clique sur la zone <u>' + levels[level] + '</u>';
+  }
+
+  function check(zone){
+    const feedback = document.getElementById('feedback');
+    if(zone === levels[level]){
+      score += 10;
+      feedback.innerHTML = '✅ Bonne réponse ! (' + zone + ')';
+      feedback.className = 'panel ok';
+      level++;
+      if(level >= levels.length){
+        feedback.innerHTML = '🎉 Jeu terminé ! Score final : ' + score;
+        document.getElementById('question').innerHTML = 'Bravo, tous les niveaux sont réussis !';
+        return;
+      }
+    } else {
+      feedback.innerHTML = '❌ Mauvaise zone. Ce n\'est pas ' + zone;
+      feedback.className = 'panel ko';
     }
-  </script>
+    document.getElementById('score').innerText = score;
+    updateQuestion();
+  }
+
+  updateQuestion();
+</script>
 </body>
 </html>
